@@ -1,5 +1,5 @@
 import numpy as np
-from .data_structures import Node
+from .data_structures import Node, Stack
 
 
 class Tensor:
@@ -34,19 +34,38 @@ class Tensor:
         self._add_to_graph(Node(self, rhs*self.data))
         return Tensor(self.data ** rhs)
 
-    ###
-
     def _add_to_graph(self, new_node):
-        new_node.next = self.__class__.graph
+        node = self.__class__.graph
+        new_node.nexts = [node] if node else None
         self.__class__.graph = new_node
 
     def backward(self, val=1):
 
-        self._add_to_graph(Node(self, val))
+        root = self.__class__.graph
+        stack = Stack(root)
 
-        node = self.__class__.graph
-        gradient = val
+        grads = val
+        while stack.is_not_empty:
 
-        while node:
-            gradient = node.accumulate(gradient)
-            node = node.next
+            node = stack.pop()
+            if node is None:
+                break
+            
+            print(node.ref)
+            grads = node.accumulate_and_store(grads)
+            print(grads)
+
+            if node.is_leaf:
+                grads = val
+                print(" a")
+            elif len(node.nexts) == 1:
+                left = node.nexts[0]
+                stack.push(left)
+                print(" b")
+            elif len(node.nexts) == 2:
+                left, right = node.nexts
+                stack.push(right)
+                stack.push(left)
+                print(" c")
+            else:
+                raise RuntimeError("uhm")
