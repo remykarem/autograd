@@ -1,8 +1,9 @@
 class Node:
-    def __init__(self, ref, g):
+    def __init__(self, ref, g, name):
         self.ref = ref
         self.g = g
         self.nexts = None
+        self.name = name
 
     def __repr__(self):
         return f"Node(ref={self.ref}, g={self.g})"
